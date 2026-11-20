@@ -1,5 +1,6 @@
-// Generator: Game Arena — interactive, hyperlink-driven classroom game deck
-// Run: node build_game_arena.js  (needs pptxgenjs, react, react-dom, react-icons, sharp)
+// Generator for interactive, hyperlink-driven classroom game decks.
+// Run: node build_game_arena.js [decks/jhs.js | decks/shs.js] [output.pptx]
+// (needs pptxgenjs, react, react-dom, react-icons, sharp; set PPTX_SKILL_DIR to apply the theme)
 const path = require("path");
 const pptxgen = require("pptxgenjs");
 const React = require("react");
@@ -8,25 +9,15 @@ const sharp = require("sharp");
 const fa = require("react-icons/fa");
 
 const SKILL = process.env.PPTX_SKILL_DIR;
-const OUT = process.argv[2] || path.join(__dirname, "Game_Arena_Interactive.pptx");
-
-const THEME = {
-  name: "Game Arena",
-  headFontFace: "Arial",
-  bodyFontFace: "Calibri",
-  colors: {
-    dk1: "14102E", lt1: "FFFFFF", dk2: "1E1650", lt2: "C9BBFF",
-    accent1: "FFC83D", accent2: "FF4F8B", accent3: "21D4B4",
-    accent4: "FF8A3D", accent5: "2ED573", accent6: "FF4757",
-    hlink: "FFC83D", folHlink: "C9BBFF",
-  },
-};
+const DECK = require(path.resolve(process.argv[2] || path.join(__dirname, "decks/jhs.js")));
+const OUT = process.argv[3] || path.join(__dirname, DECK.out);
+const THEME = DECK.theme;
 const HEX = THEME.colors;
 
 const pres = new pptxgen();
 pres.layout = "LAYOUT_WIDE"; // 13.333 x 7.5
-pres.title = "Game Arena: Interactive Classroom Games";
-pres.subject = "Gamified interactive quiz games para sa high school";
+pres.title = DECK.meta.title;
+pres.subject = DECK.meta.subject;
 pres.theme = { headFontFace: THEME.headFontFace, bodyFontFace: THEME.bodyFontFace };
 const C = pres.SchemeColor;
 const K = {
@@ -63,74 +54,8 @@ pres.defineSlideMaster({
   ],
 });
 
-// ---------- content ----------
-const QB = {
-  cats: [
-    { name: "Science", icon: "FaFlask", qs: [
-      ["Ano ang tinatawag na “powerhouse of the cell”?", "Mitochondria"],
-      ["Ano ang chemical formula ng tubig?", "H₂O"],
-      ["Anong planeta ang may pinakamaraming kilalang buwan (moons)?", "Saturn"],
-    ] },
-    { name: "Math", icon: "FaCalculator", qs: [
-      ["Ano ang halaga ng 3² + 4²?", "25"],
-      ["Solve for x:  2x + 5 = 17", "x = 6"],
-      ["Ano ang area ng bilog na may radius na 7 cm? (Gamitin ang π ≈ 22/7)", "154 cm²"],
-    ] },
-    { name: "Kasaysayan", icon: "FaLandmark", qs: [
-      ["Sino ang sumulat ng nobelang “Noli Me Tángere”?", "Dr. José Rizal"],
-      ["Kailan idineklara ang kalayaan ng Pilipinas sa Kawit, Cavite?", "Hunyo 12, 1898"],
-      ["Sino ang tinaguriang “Utak ng Katipunan”?", "Emilio Jacinto"],
-    ] },
-    { name: "English", icon: "FaBook", qs: [
-      ["What is the plural form of the word “child”?", "Children"],
-      ["Identify the figure of speech:  “The wind whispered through the trees.”", "Personification"],
-      ["What is the antonym of “benevolent”?", "Malevolent"],
-    ] },
-  ],
-  pts: [100, 200, 300],
-};
-const MC = [
-  { q: "Ano ang pinakamalaking karagatan sa mundo?", opts: ["Atlantic Ocean", "Indian Ocean", "Pacific Ocean", "Arctic Ocean"], a: 2, why: "Ang Pacific Ocean ay sumasakop ng halos one-third ng ibabaw ng Earth." },
-  { q: "Which part of speech describes a noun?", opts: ["Verb", "Adjective", "Adverb", "Preposition"], a: 1, why: "Adjectives describe nouns — e.g. “masipag na estudyante,” “a tall tree.”" },
-  { q: "Ano ang pambansang wika ng Pilipinas ayon sa 1987 Konstitusyon?", opts: ["Tagalog", "Filipino", "Ingles", "Cebuano"], a: 1, why: "Artikulo XIV, Seksyon 6: “Ang wikang pambansa ng Pilipinas ay Filipino.”" },
-  { q: "What is 15% of 200?", opts: ["15", "20", "30", "45"], a: 2, why: "0.15 × 200 = 30" },
-  { q: "Anong gas ang kailangan ng halaman para sa photosynthesis?", opts: ["Oxygen", "Nitrogen", "Carbon dioxide", "Hydrogen"], a: 2, why: "Gumagamit ang halaman ng carbon dioxide, tubig at sikat ng araw para gumawa ng glucose." },
-];
-const TF = [
-  { s: "Ang Mount Apo ang pinakamataas na bundok sa Pilipinas.", t: true, why: "Tama! Ang Mount Apo sa Mindanao ay may taas na humigit-kumulang 2,954 metro." },
-  { s: "Sound travels faster in air than in water.", t: false, why: "Mas mabilis ang tunog sa tubig (~1,480 m/s) kaysa sa hangin (~343 m/s)." },
-  { s: "Ang 0 ay isang even number.", t: true, why: "Ang 0 ay divisible by 2 (0 ÷ 2 = 0), kaya even number ito." },
-  { s: "Si Andres Bonifacio ang unang pangulo ng Pilipinas.", t: false, why: "Si Emilio Aguinaldo ang unang pangulo. Si Bonifacio ang “Supremo” ng Katipunan." },
-  { s: "The human heart has four chambers.", t: true, why: "Dalawang atrium at dalawang ventricle ang bumubuo sa puso ng tao." },
-];
-const JW = [
-  { hint: "Science: Proseso kung saan gumagawa ng sariling pagkain ang halaman", jumble: "TOHSYPSINEHOTS", word: "PHOTOSYNTHESIS" },
-  { hint: "Math: Hugis na may tatlong gilid at tatlong anggulo", jumble: "GNARLITE", word: "TRIANGLE" },
-  { hint: "Araling Panlipunan: Kabisera ng Pilipinas", jumble: "LAYNIMA", word: "MAYNILA" },
-  { hint: "English: A word that means “extremely happy”", jumble: "TICSTACE", word: "ECSTATIC" },
-  { hint: "Filipino: Pambansang ibon ng Pilipinas (5 letra)", jumble: "LAIGA", word: "AGILA" },
-];
-const MB = [
-  { kind: "q", subj: "Science", q: "Ilang buto mayroon ang katawan ng isang adult na tao?", a: "206 na buto" },
-  { kind: "s", title: "BONUS!", msg: "+200 puntos agad sa inyong team — walang tanong!", good: true },
-  { kind: "q", subj: "Math", q: "Ano ang susunod na numero?   2, 6, 12, 20, 30, ___", a: "42", why: "Ang pagitan ay 4, 6, 8, 10 … kaya +12" },
-  { kind: "q", subj: "English", q: "What do you call words that sound the same but have different meanings (e.g. “sea” and “see”)?", a: "Homophones" },
-  { kind: "s", title: "OOPS!", msg: "Ibigay ang 100 puntos ng inyong team sa team na pipiliin ninyo!", good: false },
-  { kind: "q", subj: "Araling Panlipunan", q: "Ano ang tawag sa sinaunang sistema ng pagsulat ng mga Pilipino?", a: "Baybayin" },
-];
-
-const GAMES = [
-  { id: "qb", name: "QUIZ BOARD", title: "Quiz Board", card: "QUIZ BOARD", icon: "FaThLarge", col: "yellow", desc: "Pumili ng kategorya at puntos", pts: "100–300 bawat tanong",
-    how: ["Pipili ang team ng kategorya at puntos sa board", "Sagutin ang tanong sa loob ng 30 segundo", "Tama = makukuha ang puntos ng tile", "Mali = may pagkakataong sumagot ang ibang team"] },
-  { id: "mc", name: "PILIIN ANG SAGOT", title: "Piliin ang Sagot", card: "PILIIN ANG\nSAGOT", icon: "FaListOl", col: "pink", desc: "Multiple choice, i-click ang sagot", pts: "100 bawat tamang sagot",
-    how: ["Basahin ang tanong at ang apat na pagpipilian", "I-click ang napiling sagot (A, B, C o D)", "Tama = 100 puntos at susunod na tanong", "Mali = subukan muli ng ibang team"] },
-  { id: "tf", name: "TAMA O MALI", title: "Tama o Mali", card: "TAMA O MALI", icon: "FaBalanceScale", col: "teal", desc: "Totoo ba o hindi?", pts: "50 bawat tamang sagot",
-    how: ["Basahin nang malakas ang pahayag", "Magbotohan ang team: TAMA o MALI", "I-click ang napiling button", "Alamin ang paliwanag sa bawat sagot"] },
-  { id: "jw", name: "AYUSIN ANG LETRA", title: "Ayusin ang Letra", card: "AYUSIN ANG\nLETRA", icon: "FaPuzzlePiece", col: "orange", desc: "Buuin ang salita mula sa hint", pts: "150 bawat salita",
-    how: ["Basahin ang hint sa itaas", "Ayusin ang mga letra para mabuo ang salita", "Unang team na makasagot nang tama ang panalo", "I-click ang “Ipakita ang Sagot” para i-check"] },
-  { id: "mb", name: "MYSTERY BOX", title: "Mystery Box", card: "MYSTERY BOX", icon: "FaGift", col: "lilac", desc: "Anong nasa loob ng kahon?", pts: "200 bawat tanong + sorpresa",
-    how: ["Pipili ang team ng numero ng kahon", "May tanong, BONUS, o OOPS sa loob", "Tama ang sagot = 200 puntos", "Tandaan ang mga kahong nabuksan na"] },
-];
+// ---------- content (from deck file) ----------
+const { QB, MC, TF, JW, MB, CL, GAMES } = DECK;
 const G = Object.fromEntries(GAMES.map((g, i) => [g.id, { ...g, num: i + 1 }]));
 
 // ---------- slide plan (keys -> slide numbers) ----------
@@ -139,37 +64,47 @@ const add = (key, type, data = {}, section) => plan.push({ key, type, data, sect
 add("cover", "cover", {}, "Simula");
 add("rules", "rules", {}, "Simula");
 add("menu", "menu", {}, "Simula");
-add("qb-intro", "intro", { g: "qb" }, "Laro 1: Quiz Board");
-add("qb-board", "board", {}, "Laro 1: Quiz Board");
-QB.cats.forEach((c, ci) => c.qs.forEach((q, ri) => {
-  add(`qb-q-${ci}-${ri}`, "qbq", { ci, ri }, "Laro 1: Quiz Board");
-  add(`qb-a-${ci}-${ri}`, "qba", { ci, ri }, "Laro 1: Quiz Board");
-}));
-add("mc-intro", "intro", { g: "mc" }, "Laro 2: Piliin ang Sagot");
-MC.forEach((_, i) => {
-  add(`mc-q-${i}`, "mcq", { i }, "Laro 2: Piliin ang Sagot");
-  add(`mc-ok-${i}`, "mcok", { i }, "Laro 2: Piliin ang Sagot");
-  add(`mc-no-${i}`, "mcno", { i }, "Laro 2: Piliin ang Sagot");
-});
-add("tf-intro", "intro", { g: "tf" }, "Laro 3: Tama o Mali");
-TF.forEach((_, i) => {
-  add(`tf-q-${i}`, "tfq", { i }, "Laro 3: Tama o Mali");
-  add(`tf-ok-${i}`, "tfr", { i, ok: true }, "Laro 3: Tama o Mali");
-  add(`tf-no-${i}`, "tfr", { i, ok: false }, "Laro 3: Tama o Mali");
-});
-add("jw-intro", "intro", { g: "jw" }, "Laro 4: Ayusin ang Letra");
-JW.forEach((_, i) => {
-  add(`jw-q-${i}`, "jwq", { i }, "Laro 4: Ayusin ang Letra");
-  add(`jw-a-${i}`, "jwa", { i }, "Laro 4: Ayusin ang Letra");
-});
-add("mb-intro", "intro", { g: "mb" }, "Laro 5: Mystery Box");
-add("mb-grid", "mbgrid", {}, "Laro 5: Mystery Box");
-MB.forEach((b, i) => {
-  if (b.kind === "q") {
-    add(`mb-q-${i}`, "mbq", { i }, "Laro 5: Mystery Box");
-    add(`mb-a-${i}`, "mba", { i }, "Laro 5: Mystery Box");
-  } else add(`mb-q-${i}`, "mbs", { i }, "Laro 5: Mystery Box");
-});
+for (const g of GAMES) {
+  const sec = `Laro ${G[g.id].num}: ${g.title}`;
+  add(`${g.id}-intro`, "intro", { g: g.id }, sec);
+  if (g.id === "qb") {
+    add("qb-board", "board", {}, sec);
+    QB.cats.forEach((c, ci) => c.qs.forEach((q, ri) => {
+      add(`qb-q-${ci}-${ri}`, "qbq", { ci, ri }, sec);
+      add(`qb-a-${ci}-${ri}`, "qba", { ci, ri }, sec);
+    }));
+  } else if (g.id === "cl") {
+    CL.forEach((c, i) => {
+      c.clues.forEach((_, k) => add(`cl-c-${i}-${k}`, "clc", { i, k }, sec));
+      add(`cl-a-${i}`, "cla", { i }, sec);
+    });
+  } else if (g.id === "mc") {
+    MC.forEach((_, i) => {
+      add(`mc-q-${i}`, "mcq", { i }, sec);
+      add(`mc-ok-${i}`, "mcok", { i }, sec);
+      add(`mc-no-${i}`, "mcno", { i }, sec);
+    });
+  } else if (g.id === "tf") {
+    TF.forEach((_, i) => {
+      add(`tf-q-${i}`, "tfq", { i }, sec);
+      add(`tf-ok-${i}`, "tfr", { i, ok: true }, sec);
+      add(`tf-no-${i}`, "tfr", { i, ok: false }, sec);
+    });
+  } else if (g.id === "jw") {
+    JW.forEach((_, i) => {
+      add(`jw-q-${i}`, "jwq", { i }, sec);
+      add(`jw-a-${i}`, "jwa", { i }, sec);
+    });
+  } else if (g.id === "mb") {
+    add("mb-grid", "mbgrid", {}, sec);
+    MB.forEach((b, i) => {
+      if (b.kind === "q") {
+        add(`mb-q-${i}`, "mbq", { i }, sec);
+        add(`mb-a-${i}`, "mba", { i }, sec);
+      } else add(`mb-q-${i}`, "mbs", { i }, sec);
+    });
+  } else throw new Error("unknown game " + g.id);
+}
 add("score", "score", {}, "Pagtatapos");
 add("end", "end", {}, "Pagtatapos");
 const N = Object.fromEntries(plan.map((p, i) => [p.key, i + 1]));
@@ -251,8 +186,8 @@ const R = {
   async cover(p) {
     const s = newSlide(p, "ARENA_HERO");
     await iconCircle(s, "FaGamepad", (W - 1.6) / 2, 0.8, 1.6, K.yellow, HEX.dk1);
-    s.addText([{ text: "GAME ", options: { color: K.white } }, { text: "ARENA", options: { color: K.yellow } }], { placeholder: "title" });
-    s.addText("5 interactive na laro para sa high school — Science, Math, Kasaysayan, English at Filipino", { x: 1.5, y: 4.0, w: 10.33, h: 0.6, fontSize: 20, color: K.lilac, align: "center", valign: "middle", margin: 0, isTextBox: true, objectName: nm("subtitle") });
+    s.addText([{ text: DECK.meta.titleA, options: { color: K.white } }, { text: DECK.meta.titleB, options: { color: K.yellow } }], { placeholder: "title" });
+    s.addText(DECK.meta.subtitle, { x: 1.5, y: 4.0, w: 10.33, h: 0.6, fontSize: 20, color: K.lilac, align: "center", valign: "middle", margin: 0, isTextBox: true, objectName: nm("subtitle") });
     await button(s, { x: 3.67, y: 5.15, w: 2.9, h: 0.9, text: "SIMULAN", fontSize: 24, fill: K.yellow, link: "menu", ic: "FaPlay" });
     await button(s, { x: 6.77, y: 5.15, w: 2.9, h: 0.9, text: "PAANO LARUIN", fontSize: 20, link: "rules", ic: "FaQuestion", outline: true });
     s.addNotes("I-play sa Slide Show mode (F5). Gamitin ang mga button para mag-navigate — hindi uusad ang slide kapag nag-click sa ibang bahagi. Para sa guro: puwede pa ring gamitin ang arrow keys.");
@@ -321,7 +256,7 @@ const R = {
     s.addText(g.how.map((t, i) => ({ text: t, options: { bullet: { type: "number" }, breakLine: i < g.how.length - 1 } })),
       { x: 5.0, y: 2.55, w: 7.5, h: 2.4, fontSize: 19, color: K.white, paraSpaceAfter: 10, margin: 0, valign: "top", isTextBox: true, objectName: nm("how") });
     chip(s, `PUNTOS: ${g.pts.toUpperCase()}`, 5.0, 5.15, 4.6, K.white);
-    const first = { qb: "qb-board", mc: "mc-q-0", tf: "tf-q-0", jw: "jw-q-0", mb: "mb-grid" }[g.id];
+    const first = { qb: "qb-board", cl: "cl-c-0-0", mc: "mc-q-0", tf: "tf-q-0", jw: "jw-q-0", mb: "mb-grid" }[g.id];
     await button(s, { x: 5.0, y: 5.95, w: 3.2, h: 0.85, text: "SIMULAN", fontSize: 22, fill: K[g.col], link: first, ic: "FaPlay" });
     s.addNotes(`Mekaniks ng ${g.name}: ` + g.how.join(". ") + ".");
   },
@@ -362,7 +297,7 @@ const R = {
     card(s, 0.9, 1.45, 11.53, 3.65, K.yellow);
     chip(s, "SAGOT", 1.3, 1.8, 1.9, K.bg, K.white);
     s.addText(q, { x: 1.4, y: 2.35, w: 10.53, h: 0.7, fontSize: 18, color: K.ink, align: "center", valign: "middle", margin: 0, isTextBox: true, objectName: nm("q-recap") });
-    s.addText(a, { x: 1.4, y: 3.05, w: 10.53, h: 1.7, fontSize: 60, bold: true, color: K.ink, align: "center", valign: "middle", margin: 0, isTextBox: true, objectName: nm("answer") });
+    s.addText(a, { x: 1.4, y: 3.05, w: 10.53, h: 1.7, fontSize: ansSize(a), bold: true, color: K.ink, align: "center", valign: "middle", margin: 0, isTextBox: true, objectName: nm("answer") });
     await button(s, { x: 4.67, y: 5.65, w: 4.0, h: 0.9, text: "BALIK SA BOARD", fontSize: 20, fill: K.white, link: "qb-board", ic: "FaThLarge" });
     s.addNotes(`Kung tama: +${QB.pts[ri]} puntos sa team.`);
   },
@@ -487,7 +422,7 @@ const R = {
     card(s, 0.9, 1.45, 11.53, 3.65, K.lilac);
     chip(s, "SAGOT", 1.3, 1.8, 1.9, K.bg, K.white);
     s.addText(b.q, { x: 1.4, y: 2.35, w: 10.53, h: 0.75, fontSize: 18, color: K.ink, align: "center", valign: "middle", margin: 0, isTextBox: true, objectName: nm("q-recap") });
-    s.addText(b.a, { x: 1.4, y: 3.1, w: 10.53, h: 1.3, fontSize: 60, bold: true, color: K.ink, align: "center", valign: "middle", margin: 0, isTextBox: true, objectName: nm("answer") });
+    s.addText(b.a, { x: 1.4, y: 3.1, w: 10.53, h: 1.3, fontSize: ansSize(b.a), bold: true, color: K.ink, align: "center", valign: "middle", margin: 0, isTextBox: true, objectName: nm("answer") });
     if (b.why) s.addText(b.why, { x: 1.4, y: 4.4, w: 10.53, h: 0.5, fontSize: 16, italic: true, color: K.ink, align: "center", valign: "middle", margin: 0, isTextBox: true, objectName: nm("why") });
     await button(s, { x: 4.57, y: 5.65, w: 4.2, h: 0.9, text: "BALIK SA MGA KAHON", fontSize: 18, fill: K.white, link: "mb-grid", ic: "FaGift" });
     s.addNotes("Kung tama: +200 puntos.");
@@ -498,7 +433,7 @@ const R = {
     s.addText(`Mystery Box ${i + 1} · Sorpresa!`, { placeholder: "title" });
     await menuBtn(s);
     const col = b.good ? "green" : "red";
-    await iconCircle(s, b.good ? "FaStar" : "FaBomb", (W - 2.2) / 2, 1.4, 2.2, K[col], HEX.dk1);
+    await iconCircle(s, b.icon || (b.good ? "FaStar" : "FaBomb"), (W - 2.2) / 2, 1.4, 2.2, K[col], HEX.dk1);
     s.addText(b.title, { x: 0.9, y: 3.75, w: 11.53, h: 1.0, fontSize: 60, bold: true, color: K[col], align: "center", valign: "middle", margin: 0, isTextBox: true, objectName: nm("surprise") });
     s.addText(b.msg, { x: 1.5, y: 4.75, w: 10.33, h: 0.7, fontSize: 24, color: K.white, align: "center", valign: "middle", margin: 0, isTextBox: true, objectName: nm("surprise-msg") });
     await button(s, { x: 4.57, y: 5.85, w: 4.2, h: 0.85, text: "BALIK SA MGA KAHON", fontSize: 18, fill: K[col], link: "mb-grid", ic: "FaGift" });
@@ -531,6 +466,49 @@ const R = {
     await button(s, { x: 6.77, y: 5.15, w: 2.9, h: 0.9, text: "SCOREBOARD", fontSize: 20, link: "score", ic: "FaTrophy", outline: true });
   },
 };
+// keep long answers on one line inside the 10.5" answer box
+function ansSize(a) { return a.length <= 14 ? 60 : a.length <= 20 ? 46 : 36; }
+
+Object.assign(R, {
+  // 3 Clues: clue k of item i is revealed; earlier clues stay visible, later ones locked
+  async clc(p) {
+    const { i, k } = p.data, c = CL[i], pts = [300, 200, 100];
+    const s = newSlide(p);
+    s.addText(`3 Clues \u00B7 Hula ${i + 1} sa ${CL.length}`, { placeholder: "title" });
+    await menuBtn(s);
+    s.addText([{ text: "SINO O ANO AKO?  ", options: { bold: true, color: K.orange } }, { text: c.subj, options: { color: K.lilac } }],
+      { x: 0.9, y: 1.3, w: 9.5, h: 0.45, fontSize: 16, margin: 0, valign: "middle", isTextBox: true, objectName: nm("cl-subject") });
+    for (let n = 0; n < 3; n++) {
+      const y = 1.95 + n * 1.12, open = n <= k;
+      if (open) card(s, 0.9, y, 11.53, 0.95, n === k ? K.white : K.lilac);
+      else s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: 0.9, y, w: 11.53, h: 0.95, rectRadius: 0.25, fill: { color: K.white, transparency: 92 }, line: { color: K.white, transparency: 60, width: 1, dashType: "dash" }, objectName: nm("cl-locked") });
+      s.addText(String(n + 1), { shape: pres.shapes.OVAL, x: 1.12, y: y + 0.15, w: 0.65, h: 0.65, fill: { color: open ? K.orange : K.white, transparency: open ? 0 : 80 }, line: { color: open ? K.orange : K.white, width: 0 },
+        fontSize: 22, bold: true, color: open ? K.ink : K.white, align: "center", valign: "middle", margin: 0, isTextBox: true, objectName: nm("cl-num") });
+      s.addText(open ? c.clues[n] : `Clue ${n + 1} \u2014 nakatago pa (${pts[n]} puntos)`,
+        { x: 2.0, y, w: 10.2, h: 0.95, fontSize: open ? 21 : 18, bold: open && n === k, italic: !open, color: open ? K.ink : K.lilac, valign: "middle", margin: 0, isTextBox: true, objectName: nm("cl-clue") });
+    }
+    chip(s, `KUNG MAHUHULAAN NGAYON: ${pts[k]} PUNTOS`, 0.9, 5.4, 5.6, K.yellow);
+    if (k < 2) await button(s, { x: 0.9, y: 6.15, w: 4.2, h: 0.85, text: "SUSUNOD NA CLUE", fontSize: 20, fill: K.orange, link: `cl-c-${i}-${k + 1}`, ic: "FaSearch" });
+    await button(s, { x: k < 2 ? 5.35 : 0.9, y: 6.15, w: 3.6, h: 0.85, text: "SAGOT NA!", fontSize: 20, fill: K.white, link: `cl-a-${i}`, ic: "FaEye" });
+    s.addNotes(`Sagot: ${c.a}. Puntos kung mahuhulaan sa clue ${k + 1}: ${pts[k]}.`);
+  },
+  async cla(p) {
+    const { i } = p.data, c = CL[i], last = i === CL.length - 1;
+    const s = newSlide(p);
+    s.addText(`3 Clues \u00B7 Hula ${i + 1} sa ${CL.length}`, { placeholder: "title" });
+    await menuBtn(s);
+    card(s, 0.9, 1.45, 11.53, 3.65, K.orange);
+    chip(s, "ANG SAGOT AY\u2026", 1.3, 1.8, 2.6, K.bg, K.white);
+    s.addText(c.a, { x: 1.4, y: 2.45, w: 10.53, h: 1.5, fontSize: ansSize(c.a), bold: true, color: K.ink, align: "center", valign: "middle", margin: 0, isTextBox: true, objectName: nm("answer") });
+    s.addText(c.subj, { x: 1.4, y: 4.0, w: 10.53, h: 0.6, fontSize: 18, color: K.ink, align: "center", valign: "middle", margin: 0, isTextBox: true, objectName: nm("cl-subj") });
+    if (last) {
+      await button(s, { x: 2.83, y: 5.65, w: 3.6, h: 0.9, text: "SCOREBOARD", fontSize: 20, fill: K.orange, link: "score", ic: "FaTrophy" });
+      await button(s, { x: 6.9, y: 5.65, w: 3.6, h: 0.9, text: "BALIK SA MENU", fontSize: 18, link: "menu", ic: "FaHome", outline: true });
+    } else await button(s, { x: 4.57, y: 5.65, w: 4.2, h: 0.9, text: "SUSUNOD NA HULA", fontSize: 20, fill: K.orange, link: `cl-c-${i + 1}-0`, ic: "FaArrowRight" });
+    s.addNotes("Clue 1 = 300, Clue 2 = 200, Clue 3 = 100 puntos.");
+  },
+});
+
 async function resultBlock(s, ok, head, line, why, badge) {
   const col = ok ? "green" : "red";
   await iconCircle(s, ok ? "FaCheck" : "FaTimes", 1.3, 1.75, 3.0, K[col], HEX.dk1);
